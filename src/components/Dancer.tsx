@@ -67,7 +67,7 @@ export function Dancer() {
   }, [phase, actions]);
 
   return (
-    <group ref={group} position={[0, 0, 0]} scale={0.62}>
+    <group ref={group} position={[0, 0, 0]} scale={0.42}>
       <primitive object={scene} />
     </group>
   );

@@ -40,6 +40,11 @@ export function Game() {
         <GameCanvas />
       </div>
 
+      {/* Darkening scrim for legibility on the menu screens (not during play) */}
+      {screen !== "playing" && (
+        <div className="absolute inset-0 z-[5] bg-stage/70 backdrop-blur-sm" />
+      )}
+
       {/* UI overlay */}
       <div className="relative z-10 h-full w-full">
         {screen === "start" && <StartScreen />}

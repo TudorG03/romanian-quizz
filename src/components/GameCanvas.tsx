@@ -19,8 +19,9 @@ export function GameCanvas() {
       className="absolute inset-0"
       shadows
       dpr={[1, 1.8]}
-      camera={{ position: [0, 1.7, 6.2], fov: 42 }}
+      camera={{ position: [0, 1.6, 9.5], fov: 38 }}
       gl={{ antialias: true, powerPreference: "high-performance" }}
+      onCreated={({ camera }) => camera.lookAt(0, 1.35, 0)}
     >
       <Suspense fallback={null}>
         <Stage />
@@ -30,9 +31,9 @@ export function GameCanvas() {
       </Suspense>
       <EffectComposer>
         <Bloom
-          intensity={0.9}
-          luminanceThreshold={0.25}
-          luminanceSmoothing={0.85}
+          intensity={0.7}
+          luminanceThreshold={0.3}
+          luminanceSmoothing={0.9}
           mipmapBlur
         />
       </EffectComposer>

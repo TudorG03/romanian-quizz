@@ -33,11 +33,11 @@ export function Crowd() {
       const row = Math.floor(i / perRow);
       const col = i % perRow;
       return {
-        x: (col - perRow / 2) * 0.92 + (Math.random() - 0.5) * 0.35,
-        z: -3.2 - row * 1.15 - Math.random() * 0.4,
+        x: (col - perRow / 2) * 1.05 + (Math.random() - 0.5) * 0.4,
+        z: -5.5 - row * 1.3 - Math.random() * 0.4,
         phase: Math.random() * Math.PI * 2,
         speed: 1.6 + Math.random() * 1.3,
-        scale: 0.5 + Math.random() * 0.28,
+        scale: 0.42 + Math.random() * 0.22,
       };
     });
   }, []);
