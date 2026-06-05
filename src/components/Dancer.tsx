@@ -1,5 +1,12 @@
 "use client";
 
+/*
+ * The AnimationActions returned by `useAnimations` are driven imperatively
+ * (reset / fadeIn / play / setLoop) — that is three.js's intended API for an
+ * animation state machine, so we opt out of react-hooks/immutability here.
+ */
+/* eslint-disable react-hooks/immutability */
+
 import { useGLTF, useAnimations } from "@react-three/drei";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import * as THREE from "three";

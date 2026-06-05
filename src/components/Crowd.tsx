@@ -17,6 +17,22 @@ interface Member {
   scale: number;
 }
 
+// The crowd layout is randomised once at module load (stable across renders).
+const MEMBERS: Member[] = (() => {
+  const perRow = Math.ceil(COUNT / ROWS);
+  return Array.from({ length: COUNT }, (_, i) => {
+    const row = Math.floor(i / perRow);
+    const col = i % perRow;
+    return {
+      x: (col - perRow / 2) * 1.05 + (Math.random() - 0.5) * 0.4,
+      z: -5.5 - row * 1.3 - Math.random() * 0.4,
+      phase: Math.random() * Math.PI * 2,
+      speed: 1.6 + Math.random() * 1.3,
+      scale: 0.42 + Math.random() * 0.22,
+    };
+  });
+})();
+
 /**
  * Stylized, fully instanced crowd of glowing capsule silhouettes behind the
  * dancer. They bob to the beat continuously; on a correct answer they jump
@@ -27,32 +43,17 @@ export function Crowd() {
   const mesh = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
-  const members = useMemo<Member[]>(() => {
-    const perRow = Math.ceil(COUNT / ROWS);
-    return Array.from({ length: COUNT }, (_, i) => {
-      const row = Math.floor(i / perRow);
-      const col = i % perRow;
-      return {
-        x: (col - perRow / 2) * 1.05 + (Math.random() - 0.5) * 0.4,
-        z: -5.5 - row * 1.3 - Math.random() * 0.4,
-        phase: Math.random() * Math.PI * 2,
-        speed: 1.6 + Math.random() * 1.3,
-        scale: 0.42 + Math.random() * 0.22,
-      };
-    });
-  }, []);
-
   // Per-instance neon colour (set once).
   useEffect(() => {
     const m = mesh.current;
     if (!m) return;
     const color = new THREE.Color();
-    members.forEach((_, i) => {
+    MEMBERS.forEach((_, i) => {
       color.set(PALETTE[i % PALETTE.length]);
       m.setColorAt(i, color);
     });
     if (m.instanceColor) m.instanceColor.needsUpdate = true;
-  }, [members]);
+  }, []);
 
   useFrame((state) => {
     const m = mesh.current;
@@ -63,7 +64,7 @@ export function Crowd() {
     const boo = phase === "falling";
 
     for (let i = 0; i < COUNT; i++) {
-      const member = members[i];
+      const member = MEMBERS[i];
       const amp = cheer ? 0.5 : boo ? 0.04 : 0.18;
       const speed = cheer ? member.speed * 2.1 : member.speed;
       let y = Math.abs(Math.sin(t * speed + member.phase)) * amp;

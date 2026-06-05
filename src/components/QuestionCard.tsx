@@ -1,19 +1,32 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { selectCurrentQuestion, useGame } from "@/game/store";
+
+const SWIPE_THRESHOLD = 110; // px to commit a choice
 
 /**
  * The question prompt plus the two answer panels (option 0 = left, 1 = right).
- * Controls: tap a panel, or use the ← / → arrow keys. (Swipe gestures are
- * layered on in a later step.) While a reaction is playing the panels reveal
- * the correct/incorrect colours.
+ *
+ * Controls (all equivalent):
+ *  - swipe / drag the prompt card left or right,
+ *  - tap an answer panel,
+ *  - press ← / →.
+ *
+ * The prompt card tilts and follows the drag, the target option leans in, and
+ * while a reaction plays the panels reveal the correct / incorrect colours.
  */
 export function QuestionCard() {
   const question = useGame(selectCurrentQuestion);
   const answer = useGame((s) => s.answer);
   const locked = useGame((s) => s.locked);
   const lastChoice = useGame((s) => s.lastChoice);
+
+  const [dragX, setDragX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const dragXRef = useRef(0);
+  const startX = useRef(0);
+  const active = useRef(false);
 
   // Keyboard parity with swiping.
   useEffect(() => {
@@ -27,14 +40,53 @@ export function QuestionCard() {
 
   if (!question) return null;
 
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (locked) return;
+    active.current = true;
+    setDragging(true);
+    startX.current = e.clientX;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!active.current) return;
+    const dx = e.clientX - startX.current;
+    dragXRef.current = dx;
+    setDragX(dx);
+  };
+  const endDrag = () => {
+    if (!active.current) return;
+    active.current = false;
+    setDragging(false);
+    const dx = dragXRef.current;
+    dragXRef.current = 0;
+    setDragX(0);
+    if (dx <= -SWIPE_THRESHOLD) answer(0);
+    else if (dx >= SWIPE_THRESHOLD) answer(1);
+  };
+
+  // How strongly the drag leans toward each side (for the preview highlight).
+  const lean: -1 | 0 | 1 =
+    dragX <= -SWIPE_THRESHOLD / 2 ? -1 : dragX >= SWIPE_THRESHOLD / 2 ? 1 : 0;
+  const tilt = Math.max(-14, Math.min(14, dragX * 0.05));
+
   return (
     <div className="flex h-full w-full flex-col items-center justify-between px-4 pb-6 pt-2">
-      {/* Prompt */}
+      {/* Draggable prompt card */}
       <div
         key={question.id}
-        className="mt-2 w-full max-w-md rounded-3xl border border-white/10 bg-black/35 px-5 py-6 text-center shadow-2xl backdrop-blur-md [animation:var(--animate-rise)]"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        style={{
+          transform: `translateX(${dragX}px) rotate(${tilt}deg)`,
+          transition: dragging ? "none" : "transform 0.3s cubic-bezier(0.22,1.4,0.4,1)",
+        }}
+        className="touch-none mt-2 w-full max-w-md cursor-grab rounded-3xl border border-white/10 bg-black/35 px-5 py-6 text-center shadow-2xl backdrop-blur-md [animation:var(--animate-fade)] active:cursor-grabbing"
       >
-        <p className="mb-2 text-[0.65rem] uppercase tracking-[0.3em] text-neon-cyan">Întrebare</p>
+        <p className="mb-2 text-[0.65rem] uppercase tracking-[0.3em] text-neon-cyan">
+          Glisează ← sau →
+        </p>
         <p className="text-balance text-xl font-semibold leading-snug text-white">
           {question.prompt}
         </p>
@@ -46,12 +98,14 @@ export function QuestionCard() {
           side="left"
           text={question.options[0]}
           state={panelState(0, question.correctIndex, locked, lastChoice)}
+          leaning={lean === -1}
           onPick={() => answer(0)}
         />
         <OptionPanel
           side="right"
           text={question.options[1]}
           state={panelState(1, question.correctIndex, locked, lastChoice)}
+          leaning={lean === 1}
           onPick={() => answer(1)}
         />
       </div>
@@ -84,20 +138,24 @@ function OptionPanel({
   side,
   text,
   state,
+  leaning,
   onPick,
 }: {
   side: "left" | "right";
   text: string;
   state: PanelState;
+  leaning: boolean;
   onPick: () => void;
 }) {
+  const leanClass =
+    leaning && state === "idle" ? "border-neon-pink bg-neon-pink/20 scale-[1.03]" : "";
   return (
     <button
       type="button"
       onClick={onPick}
       disabled={state !== "idle"}
       aria-label={`Răspuns ${side === "left" ? "stânga" : "dreapta"}: ${text}`}
-      className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-3xl border px-3 py-4 text-center font-semibold text-white transition active:scale-95 disabled:cursor-default ${STATE_CLASSES[state]}`}
+      className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-3xl border px-3 py-4 text-center font-semibold text-white transition active:scale-95 disabled:cursor-default ${STATE_CLASSES[state]} ${leanClass}`}
     >
       <span aria-hidden className="text-xs text-white/40">
         {side === "left" ? "← stânga" : "dreapta →"}

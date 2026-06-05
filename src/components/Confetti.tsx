@@ -23,19 +23,17 @@ interface Particle {
  * answers correctly (dancerPhase transitions into "celebrating"). Instanced,
  * unlit, gravity-driven, and recycled — no allocations per frame.
  */
+// Mutable particle pool, created once at module load and recycled in place.
+const POOL: Particle[] = Array.from({ length: COUNT }, () => ({
+  pos: new THREE.Vector3(),
+  vel: new THREE.Vector3(),
+  spin: 0,
+  life: 0,
+}));
+
 export function Confetti() {
   const mesh = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
-  const particles = useMemo<Particle[]>(
-    () =>
-      Array.from({ length: COUNT }, () => ({
-        pos: new THREE.Vector3(),
-        vel: new THREE.Vector3(),
-        spin: 0,
-        life: 0,
-      })),
-    [],
-  );
 
   // Random fixed colours for the pool.
   useEffect(() => {
@@ -54,19 +52,19 @@ export function Confetti() {
     let prev = useGame.getState().dancerPhase;
     const unsub = useGame.subscribe((s) => {
       if (s.dancerPhase !== prev) {
-        if (s.dancerPhase === "celebrating") burst(particles);
+        if (s.dancerPhase === "celebrating") burst(POOL);
         prev = s.dancerPhase;
       }
     });
     return unsub;
-  }, [particles]);
+  }, []);
 
   useFrame((_, delta) => {
     const m = mesh.current;
     if (!m) return;
     const dt = Math.min(delta, 0.05);
     for (let i = 0; i < COUNT; i++) {
-      const p = particles[i];
+      const p = POOL[i];
       if (p.life > 0) {
         p.life -= dt;
         p.vel.y -= GRAVITY * dt;
