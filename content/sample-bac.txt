@@ -1,0 +1,59 @@
+# Exemplu de set de întrebări — BAC, proba de limba română
+# Format: o întrebare pe bloc, blocurile separate prin linie goală sau „---".
+# Răspunsul corect este marcat cu „*" la final. Liniile care încep cu „#" sunt comentarii.
+
+Q: Cine a scris poemul „Luceafărul"?
+A) Mihai Eminescu *
+B) Ion Creangă
+---
+Q: Formula „A fost odată ca niciodată" este specifică speciei literare numite…
+A) basm *
+B) baladă
+---
+Q: Romanul „Ion" a fost scris de…
+A) Liviu Rebreanu *
+B) Marin Preda
+---
+Q: Ce figură de stil este prezentă în structura „obrajii ca doi bujori"?
+A) comparație *
+B) metaforă
+---
+Q: Poezia „Plumb" de George Bacovia aparține curentului literar…
+A) simbolism *
+B) romantism
+---
+Q: „Moara cu noroc" de Ioan Slavici este o…
+A) nuvelă *
+B) baladă
+---
+Q: Cine este autorul romanului „Moromeții"?
+A) Marin Preda *
+B) Camil Petrescu
+---
+Q: Pastelul „Iarna pe uliță" a fost scris de…
+A) George Coșbuc *
+B) Tudor Arghezi
+---
+Q: Comedia „O scrisoare pierdută" îi aparține lui…
+A) I. L. Caragiale *
+B) Mihail Sadoveanu
+---
+Q: Romanul „Baltagul" a fost scris de…
+A) Mihail Sadoveanu *
+B) Liviu Rebreanu
+
+Q: În versul „vântul șoptește printre crengi", figura de stil este…
+- personificarea *
+- hiperbola
+
+Q: Care este antonimul cuvântului „harnic"?
+- leneș *
+- silitor
+
+Q: Forma corectă de plural a substantivului „ou" este…
+A) ouă *
+B) ouări
+
+Q: Genul liric se caracterizează prin…
+A) exprimarea directă a sentimentelor autorului *
+B) prezentarea unei acțiuni cu personaje și conflict

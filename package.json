@@ -4,10 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "predev": "npm run prepare:content",
     "build": "next build",
+    "prebuild": "npm run prepare:content",
     "start": "next start",
     "lint": "eslint",
-    "fetch:assets": "node scripts/fetch-assets.mjs"
+    "fetch:assets": "node scripts/fetch-assets.mjs",
+    "build:questions": "tsx scripts/build-questions.ts",
+    "prepare:content": "npm run fetch:assets && npm run build:questions"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
@@ -29,6 +33,7 @@
     "eslint-config-next": "16.2.7",
     "mammoth": "^1.12.0",
     "tailwindcss": "^4",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }
