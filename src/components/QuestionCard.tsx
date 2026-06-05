@@ -3,18 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 import { selectCurrentQuestion, useGame } from "@/game/store";
 
-const SWIPE_THRESHOLD = 110; // px to commit a choice
+const DRAG_START = 8; // px of movement before a press becomes a swipe
+const SWIPE_THRESHOLD = 90; // px to commit a choice
 
 /**
  * The question prompt plus the two answer panels (option 0 = left, 1 = right).
  *
  * Controls (all equivalent):
- *  - swipe / drag the prompt card left or right,
+ *  - swipe / drag anywhere in the play area left or right,
  *  - tap an answer panel,
  *  - press ← / →.
  *
- * The prompt card tilts and follows the drag, the target option leans in, and
- * while a reaction plays the panels reveal the correct / incorrect colours.
+ * The whole arena is the swipe surface: a press that moves past DRAG_START
+ * becomes a swipe (the prompt card follows and the target option leans in),
+ * while a press that doesn't move stays a tap so the option buttons still work.
  */
 export function QuestionCard() {
   const question = useGame(selectCurrentQuestion);
@@ -22,11 +24,14 @@ export function QuestionCard() {
   const locked = useGame((s) => s.locked);
   const lastChoice = useGame((s) => s.lastChoice);
 
+  const arenaRef = useRef<HTMLDivElement>(null);
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const dragXRef = useRef(0);
   const startX = useRef(0);
+  const pointerId = useRef<number | null>(null);
   const active = useRef(false);
+  const moved = useRef(false);
 
   // Keyboard parity with swiping.
   useEffect(() => {
@@ -41,25 +46,41 @@ export function QuestionCard() {
   if (!question) return null;
 
   const onPointerDown = (e: React.PointerEvent) => {
-    if (locked) return;
+    if (locked || e.button !== 0) return;
     active.current = true;
-    setDragging(true);
+    moved.current = false;
     startX.current = e.clientX;
-    e.currentTarget.setPointerCapture(e.pointerId);
+    pointerId.current = e.pointerId;
   };
+
   const onPointerMove = (e: React.PointerEvent) => {
     if (!active.current) return;
     const dx = e.clientX - startX.current;
+    if (!moved.current) {
+      // Stay a tap until the finger/mouse actually travels.
+      if (Math.abs(dx) < DRAG_START) return;
+      moved.current = true;
+      setDragging(true);
+      arenaRef.current?.setPointerCapture(e.pointerId);
+    }
     dragXRef.current = dx;
     setDragX(dx);
   };
+
   const endDrag = () => {
     if (!active.current) return;
     active.current = false;
+    const wasDrag = moved.current;
+    moved.current = false;
     setDragging(false);
     const dx = dragXRef.current;
     dragXRef.current = 0;
     setDragX(0);
+    if (pointerId.current !== null) {
+      arenaRef.current?.releasePointerCapture(pointerId.current);
+      pointerId.current = null;
+    }
+    if (!wasDrag) return; // a tap — let the option button's onClick handle it
     if (dx <= -SWIPE_THRESHOLD) answer(0);
     else if (dx >= SWIPE_THRESHOLD) answer(1);
   };
@@ -70,19 +91,22 @@ export function QuestionCard() {
   const tilt = Math.max(-14, Math.min(14, dragX * 0.05));
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-between px-4 pb-6 pt-2">
-      {/* Draggable prompt card */}
+    <div
+      ref={arenaRef}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      className="touch-none flex h-full w-full cursor-grab select-none flex-col items-center justify-between px-4 pb-6 pt-2 active:cursor-grabbing"
+    >
+      {/* Prompt card follows the drag */}
       <div
         key={question.id}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
         style={{
           transform: `translateX(${dragX}px) rotate(${tilt}deg)`,
           transition: dragging ? "none" : "transform 0.3s cubic-bezier(0.22,1.4,0.4,1)",
         }}
-        className="touch-none mt-2 w-full max-w-md cursor-grab rounded-3xl border border-white/10 bg-black/35 px-5 py-6 text-center shadow-2xl backdrop-blur-md [animation:var(--animate-fade)] active:cursor-grabbing"
+        className="mt-2 w-full max-w-md rounded-3xl border border-white/10 bg-black/35 px-5 py-6 text-center shadow-2xl backdrop-blur-md [animation:var(--animate-fade)]"
       >
         <p className="mb-2 text-[0.65rem] uppercase tracking-[0.3em] text-neon-cyan">
           Glisează ← sau →
