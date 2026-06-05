@@ -1,10 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
+import dynamic from "next/dynamic";
 import { REACTION_MS, useGame } from "@/game/store";
 import { StartScreen } from "./StartScreen";
 import { PlayScreen } from "./PlayScreen";
 import { EndScreen } from "./EndScreen";
+
+// The 3D stage is client-only (WebGL); never server-render it.
+const GameCanvas = dynamic(() => import("./GameCanvas").then((m) => m.GameCanvas), {
+  ssr: false,
+});
 
 /**
  * Drives the reaction → advance timing: once the dancer enters a reaction
@@ -29,7 +35,12 @@ export function Game() {
 
   return (
     <main className="touch-arena relative h-full w-full overflow-hidden">
-      {/* The 3D stage (added next) sits behind this overlay. */}
+      {/* 3D stage behind everything */}
+      <div className="absolute inset-0 z-0">
+        <GameCanvas />
+      </div>
+
+      {/* UI overlay */}
       <div className="relative z-10 h-full w-full">
         {screen === "start" && <StartScreen />}
         {screen === "playing" && <PlayScreen />}
