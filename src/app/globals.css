@@ -1,26 +1,83 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* Stage / neon palette */
+  --color-stage: #07060f;
+  --color-stage-2: #120a26;
+  --color-neon-pink: #ff2d95;
+  --color-neon-cyan: #20e3ff;
+  --color-neon-violet: #b14bff;
+  --color-neon-lime: #b6ff3a;
+  --color-neon-amber: #ffb020;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Reusable motion */
+  --animate-pop: pop 0.45s cubic-bezier(0.22, 1.4, 0.4, 1) both;
+  --animate-rise: rise 0.5s ease-out both;
+  --animate-shake: shake 0.5s ease-in-out both;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
+@keyframes rise {
+  0% {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-10px);
+  }
+  40% {
+    transform: translateX(10px);
+  }
+  60% {
+    transform: translateX(-6px);
+  }
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(120% 90% at 50% 0%, var(--color-stage-2) 0%, var(--color-stage) 60%);
+  color: #f4f1ff;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Stop the swipe gesture from scrolling/refreshing on mobile. */
+.touch-arena {
+  touch-action: none;
 }
