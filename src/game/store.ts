@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type { Question } from "@/content/types";
 import { QUESTIONS } from "@/data/questions";
-import { sampleQuestions } from "./sample";
+import { sampleQuestions, withRandomSides } from "./sample";
 
 export type Screen = "start" | "playing" | "end";
 
@@ -62,7 +62,7 @@ export const useGame = create<GameState>((set, get) => ({
   start: (size) =>
     set({
       screen: "playing",
-      batch: sampleQuestions(QUESTIONS, size),
+      batch: sampleQuestions(QUESTIONS, size).map(withRandomSides),
       index: 0,
       score: 0,
       dancerPhase: "dancing",
