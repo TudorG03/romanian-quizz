@@ -1,25 +1,26 @@
 import type { QuestionParser } from "../types";
 import { nativeTextParser } from "./nativeText";
 import { jsonParser } from "./json";
+import { letteredMcqParser } from "./letteredMcq";
 
 /** All registered text-based parsing strategies. */
-export const PARSERS: readonly QuestionParser[] = [nativeTextParser, jsonParser];
+export const PARSERS: readonly QuestionParser[] = [
+  nativeTextParser,
+  jsonParser,
+  letteredMcqParser,
+];
 
 /** File extensions that the build pipeline knows how to read. */
-export const SUPPORTED_EXTENSIONS = new Set<string>([
-  ...PARSERS.flatMap((p) => p.extensions),
-  ".docx", // extracted to text upstream, then parsed as native text
-]);
+export const SUPPORTED_EXTENSIONS = new Set<string>(PARSERS.flatMap((p) => p.extensions));
 
 /**
  * Resolve the parser for a given file extension (with leading dot, any case).
- * `.docx` is converted to plain text by the build script and then parsed with
- * the native-text strategy, so it maps here too.
+ * `.docx` is extracted to plain text by the build script and parsed with the
+ * lettered-MCQ strategy (numbered questions, `A./B.` options, `(C)` = correct).
  */
 export function resolveParser(ext: string): QuestionParser | undefined {
   const e = ext.toLowerCase();
-  if (e === ".docx") return nativeTextParser;
   return PARSERS.find((p) => p.extensions.includes(e));
 }
 
-export { nativeTextParser, jsonParser };
+export { nativeTextParser, jsonParser, letteredMcqParser };
