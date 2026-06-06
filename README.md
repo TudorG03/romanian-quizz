@@ -50,11 +50,34 @@ npm run lint                 # eslint
 Drop question files into the **`/content`** folder. They're parsed at build time;
 re-running `npm run dev`/`build` (or `npm run build:questions`) regenerates the bank.
 
-Supported formats: **`.txt` / `.md`** (native format), **`.json`**, **`.docx`**
-(text extracted via `mammoth`, then parsed as native).
+Supported formats: **`.docx`** (lettered MCQ — the real BAC bank lives here),
+**`.txt` / `.md`** (native format), and **`.json`**.
 
 Each question has exactly **two** options (the game is a binary swipe) and exactly
-**one** correct answer.
+**one** correct answer. The correct answer's **on-screen side (left/right) is
+randomized per question at runtime**, so authoring always-correct-first is fine.
+
+### Lettered MCQ (`.docx`)
+
+The shipped question bank (`content/bac-romana.docx`) uses this format: numbered
+questions, lettered options, and the correct one tagged with a trailing `(C)`.
+Lines that are neither numbered nor lettered are treated as **topic headers** and
+ignored — questions from every topic are shuffled together.
+
+```
+Luceafărul
+
+1. Artă poetică aparținând lui Mihai Eminescu
+A. Luceafărul (C)
+B. Testament
+
+2. În ce an este publicat poemul Luceafărul?
+A. 1883 (C)
+B. 1914
+```
+
+Text is extracted from the `.docx` via `mammoth`, then parsed. The build **fails
+loudly** on a malformed question (not exactly two options, not exactly one `(C)`).
 
 ### Native text format
 
@@ -127,4 +150,4 @@ question bank, so the deployed app needs no runtime filesystem access.
 ## License / assets
 
 `RobotExpressive.glb` is CC0 (three.js examples, by Tomás Laulhé, modified by Don
-McCurdy). Sample questions are illustrative BAC-style items.
+McCurdy). The question bank in `content/` is author-supplied BAC study material.
