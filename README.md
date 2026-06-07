@@ -19,15 +19,17 @@ crossfades back to dancing and the next question appears.
 | -------------- | ------ |
 | Framework      | Next.js 16 (App Router, TypeScript), deploys on Vercel |
 | 3D             | three.js via `@react-three/fiber`, `@react-three/drei`, `@react-three/postprocessing` (bloom) |
-| Dancer model   | [`RobotExpressive.glb`](https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive) — CC0, ships with `Dance` / `Jump` / `ThumbsUp` / `Wave` / `Death` clips |
+| Dancer model   | Mixamo-sourced human male dancer — three single-clip FBX (`dance.fbx` loop / `cheer.fbx` correct / `fall.fbx` wrong), loaded and retargeted in the browser |
 | State          | `zustand` |
 | UI / styling   | Tailwind CSS v4 |
 | Content        | parsed at **build time** from `/content` into a bundled JSON |
 
 > Note: the original plan used Ready Player Me for a realistic avatar, but RPM shut
-> down (Netflix acquisition, Jan 2026). We use the CC0 RobotExpressive robot
-> instead. Swapping in a realistic character later is a drop-in — replace the GLB
-> and remap the clip names in `src/components/Dancer.tsx`.
+> down (Netflix acquisition, Jan 2026), so the dancer is a set of Mixamo FBX clips
+> committed to the repo. All three clips share one skeleton, so the cheer/fall
+> animations retarget onto the dance mesh at runtime. Swapping characters is a
+> drop-in — replace the FBX files (same rig) and adjust `FBX`/`CLIPS` in
+> `src/components/Dancer.tsx`.
 
 ## Quick start
 
@@ -130,9 +132,9 @@ Parsing is a strategy pattern. To support a new text format, implement
 ```
 content/                      # author-supplied question files (build input)
 scripts/
-  fetch-assets.mjs            # downloads the dancer GLB
+  fetch-assets.mjs            # verifies the committed dancer FBX files are present
   build-questions.ts          # /content -> src/data/questions.generated.json
-public/models/RobotExpressive.glb
+public/models/{dance,cheer,fall}.fbx
 src/
   app/                        # layout, page, global styles
   components/                 # Game, GameCanvas, Stage, Dancer, Crowd, Confetti, screens, HUD, QuestionCard
@@ -144,10 +146,12 @@ src/
 ## Deploy to Vercel
 
 Import the repo in Vercel and deploy — no configuration needed. The default build
-command (`next build`) runs `prebuild`, which fetches the asset and regenerates the
-question bank, so the deployed app needs no runtime filesystem access.
+command (`next build`) runs `prebuild`, which verifies the committed dancer asset
+and regenerates the question bank, so the deployed app needs no runtime filesystem
+access.
 
 ## License / assets
 
-`RobotExpressive.glb` is CC0 (three.js examples, by Tomás Laulhé, modified by Don
-McCurdy). The question bank in `content/` is author-supplied BAC study material.
+The dancer FBX files are exported from Mixamo (Adobe) — see Mixamo's license terms
+for use of its characters and animations. The question bank in `content/` is
+author-supplied BAC study material.
